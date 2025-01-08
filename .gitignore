@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+/P840625-20/orig
+P840625-20/Makefile~
+P840625-20/DISK6.ZIP
+P840625-20/pal20.for
