@@ -39,9 +39,9 @@ The main changes include:
 
 ## License ##
 
-All files in this project are provided under the APGL V3 license.
+All files in this project are provided under the GPL V3 license.
 
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## Build ##
 
