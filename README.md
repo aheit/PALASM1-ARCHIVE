@@ -48,8 +48,8 @@ All files in this project are provided under the APGL V3 license.
 To create a PALASM 1 executable, perform the following steps:
 
 * install the following packages: gfortran, make, diff, patch, wget
-* clone the PALASM-revival repository: `git clone https://github.com/aheit/PALASM-revival.git`
-* select the variant to be built: `cd palasm1-revival/<variant to be built>`
+* clone the PALASM1-ARCHIVE repository: `git clone https://github.com/aheit/PALASM1-ARCHIVE.git`
+* select the variant to be built: `cd PALASM1-ARCHIVE/<variant to be built>`
 * download the original source, apply the patch and perform the build: `make`
 
 ## Using PALASM 1 ##
