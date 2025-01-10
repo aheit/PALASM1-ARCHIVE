@@ -1,0 +1,452 @@
+# patch for PALASM1-ARCHIVE
+# 
+# This file is part of PALASM1-ARCHIVE
+# 
+# PALASM1-ARCHIVE is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# PALASM1-ARCHIVE is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with PALASM1-ARCHIVE.  If not, see <https://www.gnu.org/licenses/>.
+#
+# Author: Andreas Heitmann
+# Date: 2025-01-10
+#
+diff --strip-trailing-cr --unified orig/palasm24.for new/palasm24.for
+--- orig/palasm24.for	2025-01-10 16:10:56.477356900 +0100
++++ new/palasm24.for	2025-01-10 16:16:34.265233200 +0100
+@@ -110,19 +110,31 @@
+ C
+ C***********************************************************************
+ C
++C                       PATCHES FOR GFORTRAN COMPILER
++C                       (C) 2024 ANDREAS HEITMANN
++C
++C***********************************************************************
++C
+ C
+ C     MAIN PROGRAM
+ C
+       IMPLICIT INTEGER (A-Z)
+-      INTEGER IPAL(3),INAME(5),REST(72),PATNUM(80),TITLE(80),COMP(80),
++      CHARACTER IPAGE(80,200)
++      CHARACTER IPAL(3),INAME(5),REST(72),PATNUM(80),TITLE(80),COMP(80),
+      1        ISYM(8,24),IBUF(8,24),JPROD(80)
+ C
+       LOGICAL LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR,LFIRST,
+      1        LMATCH,LFUSES(40,80),LPHASE(24),LBUF(24),LPROD(80),
+      2        LSAME,LACT,LOPERR,LINP,LERR,LSA11,LSA01,LPHANT(40,80)
++      CHARACTER E,O,T,P,B,D,H,S
++      CHARACTER L,N,C,Q,U,F,Y
++      CHARACTER BB,CC,DD,EE,FF,II,NN
++      CHARACTER OO,PP,RR,SS,TT,UU,JJ
+       INTEGER BEL
++      CHARACTER IOP,IOT
++      CHARACTER(LEN=1024) :: FILENAME
+       COMMON  LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR
+-      COMMON /PGE/ IPAGE(80,200)
++      COMMON /PGE/ IPAGE
+       COMMON /LFUSES/LFUSES,LPHANT
+       COMMON /FTEST/ IFUNCT,IDESC,IEND
+       COMMON /LUNIT/ PMS,POF,PDF
+@@ -148,6 +160,13 @@
+       READ(5,2) LUN
+     2 FORMAT(I4)
+       RPD=1
++C     PATCH: GET INPUT FILE NAME FROM COMMAND LINE
++      CALL GETARG(1, FILENAME)
++      OPEN(UNIT=RPD, FILE=FILENAME, STATUS='OLD', IOSTAT=ios)
++      IF (IOS /= 0) THEN
++      	 PRINT *, 'Error opening file: ', filename
++	 STOP
++      END IF
+       ROC=5
+       POF=LUN
+       PDF=LUN
+@@ -280,7 +299,7 @@
+                 IBLOW = IBLOW - 1
+                 LFUSES(IINPUT,IPROD)=.FALSE.
+                 CALL PLOT(LBUF,IBUF,LFUSES,IPROD,TITLE,.FALSE.,ITYPE,
+-     1                    LPROD,IOP,IBLOW)
++     1                    LPROD,IOP,IBLOW,IPCTR0)
+    60           IF(LAND) GO TO 50
+    64           IF(.NOT.LRIGHT) GO TO 68
+    66           CALL INCR(IC,IL)
+@@ -333,7 +352,7 @@
+      2                  IOP.NE.JJ)
+       IF (IOP.NE.JJ) GOTO 130
+       CALL TEST(LPHASE,LBUF,TITLE,IC,IL,ILE,ISYM,IBUF,
+-     1           ITYPE,IPCTR,LERR,ISAF,IPCTR1,.FALSE.,.FALSE.,.FALSE.,
++     1           ITYPE,IPCTR,LERR,ISAF,IPCTR1,.FALSE.,.FALSE.,
+      2           IOP.NE.JJ)
+       CALL PLOTF(ITYPE,IOT)
+   130 ISAF=0
+@@ -388,28 +407,33 @@
+ C     THIS SUBROUTINE INITIALIZIES VARIABLES AND MATCHES PAL PART
+ C     NUMBER WITH ITYPE
+       IMPLICIT INTEGER (A-Z)
+-      INTEGER INAME(5),INFO(6,14),TSTVEC
++      CHARACTER INAME(5),INFO(6,14),TSTVEC(24,42)
+       LOGICAL LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LFUSES(40,80),
+      1        LMATCH,LXOR,LPHANT(40,80)
+       COMMON  LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR
+-      COMMON /PGE/ IPAGE(80,200)
++      CHARACTER IPAGE(80,200)
++      COMMON /PGE/ IPAGE
+       COMMON /TSTVEC/ NTEST,TSTVEC
++      CHARACTER, PARAMETER :: C1 = CHAR(1), C2 = CHAR(2), C3 = CHAR(3),
++     $     C4 = CHAR(4), C5 = CHAR(5),  C6 = CHAR(6), C7 = CHAR(7), C8 =
++     $     CHAR(8), C9 = CHAR(9), C10 = CHAR(10), C11 = CHAR(11), C12 =
++     $     CHAR(12), C13 = CHAR(13), C14 = CHAR(14)
+       DATA INFO
+-     1    /'1','2','L','1','0',1,
+-     2     '1','4','L','8',' ',2,
+-     3     '1','6','L','6',' ',3,
+-     4     '1','8','L','4',' ',4,
+-     5     '2','0','L','2',' ',5,
+-     6     '2','0','C','1',' ',6,
+-     7     '2','0','L','1','0',7,
+-C
+-     8     '2','0','X','1','0',8,
+-     9     '2','0','X','8',' ',9,
+-     A     '2','0','X','4',' ',10,
+-     B     '2','0','L','8',' ',11,
+-     C     '2','0','R','8',' ',12,
+-     D     '2','0','R','6',' ',13,
+-     E     '2','0','R','4',' ',14/
++     1    /'1','2','L','1','0',C1,
++     2     '1','4','L','8',' ',C2,
++     3     '1','6','L','6',' ',C3,
++     4     '1','8','L','4',' ',C4,
++     5     '2','0','L','2',' ',C5,
++     6     '2','0','C','1',' ',C6,
++     7     '2','0','L','1','0',C7,
++C
++     8     '2','0','X','1','0',C8,
++     9     '2','0','X','8',' ',C9,
++     A     '2','0','X','4',' ',C10,
++     B     '2','0','L','8',' ',C11,
++     C     '2','0','R','8',' ',C12,
++     D     '2','0','R','6',' ',C13,
++     E     '2','0','R','4',' ',C14/
+ C     INITIALIZE LFUSES ARRAY (FUSE ARRAY)
+       DO 20 J=1,80
+          DO 20 I=1,40
+@@ -433,7 +457,7 @@
+          LMATCH=.TRUE.
+          DO 30 I=1,4
+    30       IF(INAME(I).NE.INFO(I,J)) LMATCH=.FALSE.
+-         IF(LMATCH) ITYPE=INFO(6,J)
++         IF(LMATCH) ITYPE=ICHAR(INFO(6,J))
+          IF (LMATCH) GO TO 50
+    40 CONTINUE
+       IF(ITYPE.EQ.0) RETURN
+@@ -447,10 +471,12 @@
+ C     THIS SUBROUTINE GETS THE PIN NAME, / IF COMPLEMENT LOGIC, AND
+ C      THE FOLLOWING OPERATION SYMBOL IF ANY
+       IMPLICIT INTEGER (A-Z)
+-      INTEGER ISYM(8,24)
++      CHARACTER ISYM(8,24)
+       LOGICAL LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR,LPHASE(24)
+       COMMON  LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR
+-      COMMON /PGE/ IPAGE(80,200)
++      CHARACTER IPAGE(80,200)
++      COMMON /PGE/ IPAGE
++      CHARACTER IBLANK
+       DATA IBLANK/' '/
+       IF( .NOT.(LLEFT.OR.LAND.OR.LOR.OR.LEQUAL.OR.LRIGHT) )  GO TO 10
+       CALL INCR(IC,IL)
+@@ -476,10 +502,14 @@
+       IMPLICIT INTEGER (A-Z)
+       LOGICAL LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR,LXOR1
+       COMMON  LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR
+-      COMMON /PGE/ IPAGE(80,200)
++      CHARACTER IPAGE(80,200)
++      COMMON /PGE/ IPAGE
+       COMMON /LUNIT/ PMS,POF,PDF
++      CHARACTER IBLANK, ILEFT, IAND, IOR, COMENT, ISLASH, IEQUAL, IRIGHT
++     $     , ICOLON, TAB
++      CHARACTER, PARAMETER :: CTAB = CHAR(9)
+       DATA IBLANK/' '/,ILEFT/'('/,IAND/'*'/,IOR/'+'/,COMENT/';'/,
+-     1        ISLASH/'/'/,IEQUAL/'='/,IRIGHT/')'/,ICOLON/':'/,TAB/009/
++     1        ISLASH/'/'/,IEQUAL/'='/,IRIGHT/')'/,ICOLON/':'/,TAB/CTAB/
+       LBLANK=.FALSE.
+       LXOR=.FALSE.
+       LXOR1=.FALSE.
+@@ -521,7 +551,7 @@
+ C
+ C      AND THE PIN NAME IN THE PIN LIST OR FUNCTION TABLE PIN LIST
+       IMPLICIT INTEGER (A-Z)
+-      INTEGER IBUF(8,24),ISYM(8,24)
++      CHARACTER IBUF(8,24),ISYM(8,24)
+       LOGICAL LMATCH
+       IMATCH=0
+       DO 20 J=1,24
+@@ -569,10 +599,12 @@
+       SUBROUTINE ECHO(IPAL,INAME,REST,PATNUM,TITLE,COMP)
+ C     THIS SUBROUTINE PRINTS THE PAL DESIGN SPECIFICATION INPUT FILE
+       IMPLICIT INTEGER (A-Z)
+-      INTEGER IPAL(3),INAME(5),REST(72),PATNUM(80),TITLE(80),COMP(80)
+-      COMMON /PGE/ IPAGE(80,200)
++      CHARACTER IPAL(3),INAME(5),REST(72),PATNUM(80),TITLE(80),COMP(80)
++      CHARACTER IPAGE(80,200)
++      COMMON /PGE/ IPAGE
+       COMMON /LUNIT/ PMS,POF,PDF
+       COMMON /FTEST/ IFUNCT,IDESC,IEND
++      CHARACTER IBLANK
+       DATA IBLANK/' '/
+       WRITE(POF,5) IPAL,INAME,REST,PATNUM,TITLE,COMP
+     5 FORMAT(/,' ',3A1,5A1,72A1,/,' ',80A1,/,' ',80A1,/,' ',80A1)
+@@ -629,9 +661,11 @@
+       SUBROUTINE PINOUT(IPAL,INAME,TITLE)
+ C     THIS SUBROUTINE PRINTS THE PINOUT OF THE PAL
+       IMPLICIT INTEGER (A-Z)
+-      INTEGER IPAL(3),INAME(5),TITLE(80),PIN(12,24),IIN(8,2)
+-      COMMON /PGE/ IPAGE(80,200)
++      CHARACTER IPAL(3),INAME(5),TITLE(80),PIN(12,24),IIN(8,2)
++      CHARACTER IPAGE(80,200)
++      COMMON /PGE/ IPAGE
+       COMMON /LUNIT/ PMS,POF,PDF
++      CHARACTER IBLANK,ISTAR
+       DATA IBLANK/' '/,ISTAR/'*'/
+       DO 10 J=1,24
+           DO 5 I=1,12
+@@ -717,14 +751,19 @@
+      1                IOP,IBLOW,IPCTR0)
+ C     THIS SUBROUTINE PRODUCES THE FUSE PLOT
+       IMPLICIT INTEGER (A-Z)
+-      INTEGER IBUF(8,24),IOUT(64),ISAVE(80,40),TITLE(80),IDATA(40)
++      CHARACTER IBUF(8,24),IOUT(64),ISAVE(80,40),TITLE(80),IDATA(40)
+       LOGICAL LBUF(24),LFUSES(40,80),LDUMP,LPROD(80)
+-      INTEGER STX,ETX
++      CHARACTER IOP
++      CHARACTER, PARAMETER :: CSTX=CHAR(2), CETX=CHAR(3)
+       COMMON /LUNIT/ PMS,POF,PDF
++      CHARACTER IAND, IOR, ISLASH, IDASH, X, IBLANK, P, B, D, ZERO,
++     $     ONE, FX, FIDASH
+       DATA ISAVE/3200*' '/,IAND/'*'/,IOR/'+'/,ISLASH/'/'/,
+      1     IDASH/'-'/,X/'X'/,IBLANK/' '/,P/'P'/,B/'B'/,
+      2     D/'D'/,ZERO/'0'/,ONE/'1'/,FX/'0'/,FIDASH/'O'/
+-      DATA STX/002/,ETX/003/
++      CHARACTER STX,ETX
++      DATA STX/CSTX/,ETX/CETX/
++
+       IF(LDUMP) GO TO 58
+       IF(ISAVE(IPROD,1).NE.IBLANK) RETURN
+       IF(LBUF(1)) GO TO 5
+@@ -821,22 +860,28 @@
+ C     THIS SUBROUTINE GENERATES THE JEDEC PROGRAMMING FORMAT WHICH IS
+ C      COMPATIBLE WITH THE DATA I/O PROGRAMMABLE LOGIC PAK (PLDS)
+       IMPLICIT INTEGER (A-Z)
++      CHARACTER ICONV
+       LOGICAL LFUSES(40,80),LPHANT(40,80)
+-      INTEGER IPBUF(40),ZERO,ONE,TSTVEC(24,42)
+-      INTEGER ISUM(4),IADR,STX,ETX,IDEC(4),IPT,IINP,J1,J2,PINOUT(2)
++      CHARACTER IPBUF(40),ZERO,ONE,TSTVEC(24,42)
++      INTEGER ISUM(4),IADR,IDEC(4),IPT,IINP,J1,J2,PINOUT(2)
++      CHARACTER STX,ETX
+       INTEGER IOUT(64)
+-      INTEGER IDECIO(4),ISUMV(4),ISUMIO(4),BUFIO(40),NFUSE,NTEST,IOT
++      CHARACTER IDECIO(4)
++      INTEGER ISUMV(4),BUFIO(40),NFUSE,NTEST
++      CHARACTER ISUMIO(4),IOT
+       COMMON /LUNIT/PMS,POF,PDF
+       COMMON /IPT/IPT
+       COMMON /LFUSES/LFUSES,LPHANT
+       COMMON /SUM/ISUM,IDEC,IPBUF,BUFIO,NFUSE
+-      COMMON /BLK/ PR8X10(10,14),PROD8(8,11),PRODLN(40,7)
++      CHARACTER PRODLN(40,7)
++      COMMON /BLK/ PR8X10(10,14),PROD8(8,11),PRODLN
+       COMMON /TSTVEC/ NTEST,TSTVEC
++      CHARACTER FX,FIDASH,L,H,X,C,Z,N0,N1,STAR,NN
+       DATA ZERO/'0'/,ONE/'1'/,FX/'0'/,FIDASH/'O'/,L/'L'/,H/'H'/,X/'X'/,
+      1     C/'C'/,Z/'Z'/,N0/'0'/,N1/'1'/,STAR/'*'/,NN/'N'/
+       IADR=0
+-      STX=2
+-      ETX=3  
++      STX=CHAR(2)
++      ETX=CHAR(3)
+ C	DATA I/O PROGRAMMING ASSIGNMENT
+       IF (ITYPE.NE.11) GOTO 444
+           PINOUT(1) = 2
+@@ -892,21 +937,21 @@
+           ISUM(2)  = MOD(ISUM(2)+ISUM(4)/256,256)
+           ISUM(4)  = MOD(ISUM(4),256)
+           DO 350 I = 1,24
+-          J1 =  (TSTVEC(I,J))
+-          IF (J1.EQ.C) ISUM(4) = ISUM(4) + 67
+-          IF (J1.EQ.X) ISUM(4) = ISUM(4) + 88
+-          IF (J1.EQ.NN) ISUM(4) = ISUM(4) + 78
+-          IF (J1.EQ.L) ISUM(4) = ISUM(4) + 76
+-          IF (J1.EQ.H) ISUM(4) = ISUM(4) + 72
+-          IF (J1.EQ.Z) ISUM(4) = ISUM(4) + 90
+-          IF (J1.EQ.N1) ISUM(4) = ISUM(4) + 49
+-          IF (J1.EQ.N0) ISUM(4) = ISUM(4) + 48
++          J1 = ICHAR(TSTVEC(I,J))
++          IF (J1.EQ.ICHAR(C)) ISUM(4) = ISUM(4) + 67
++          IF (J1.EQ.ICHAR(X)) ISUM(4) = ISUM(4) + 88
++          IF (J1.EQ.ICHAR(NN)) ISUM(4) = ISUM(4) + 78
++          IF (J1.EQ.ICHAR(L)) ISUM(4) = ISUM(4) + 76
++          IF (J1.EQ.ICHAR(H)) ISUM(4) = ISUM(4) + 72
++          IF (J1.EQ.ICHAR(Z)) ISUM(4) = ISUM(4) + 90
++          IF (J1.EQ.ICHAR(N1)) ISUM(4) = ISUM(4) + 49
++          IF (J1.EQ.ICHAR(N0)) ISUM(4) = ISUM(4) + 48
+           ISUM(2) = MOD(ISUM(2)+ISUM(4)/256,256)
+           ISUM(4) = MOD(ISUM(4),256)
+ 350       CONTINUE
+           DO 360 I = 1,4
+-          IDECIO(I) = MOD(J/10**(4-I),10)
+-          ISUM(4)   = ISUM(4) + IDECIO(I) + 48
++          IDECIO(I) = CHAR(MOD(J/10**(4-I),10))
++          ISUM(4)   = ISUM(4) + ICHAR(IDECIO(I)) + ICHAR('0')
+           ISUM(2)   = MOD(ISUM(2)+ISUM(4)/256,256)
+           ISUM(4)   = MOD(ISUM(4),256)
+ 360	  CONTINUE
+@@ -931,7 +976,8 @@
+ C     FORMAT
+       IMPLICIT INTEGER(A-Z)
+       LOGICAL LFUSES(40,80),LPHANT(40,80)
+-      INTEGER IPBUF(40), BUFIO(40)
++      INTEGER BUFIO(40)
++      CHARACTER IPBUF(40)
+       INTEGER ISUM(4), IDEC(4)
+       COMMON /IPT/IPT
+       COMMON /LFUSES/ LFUSES,LPHANT
+@@ -959,10 +1005,11 @@
+ C***********************************************************************
+ C      
+   
+-      INTEGER FUNCTION ICONV(K)
++      CHARACTER FUNCTION ICONV(K)
+ C     THIS INTEGER FUNCTION CONVERTS DECIMAL INTO ASCII CODE FOR THE
+ C      JEDEC PROGRAMMING FORMAT
+       IMPLICIT INTEGER (A-Z)
++      CHARACTER A,B,C,D,E,F,G,H,I,J,X,L,M,N,O,P
+       DATA A/'0'/,B/'1'/,C/'2'/,D/'3'/,E/'4'/,F/'5'/,G/'6'/,H/'7'/,
+      1     I/'8'/,J/'9'/,X/'A'/,L/'B'/,M/'C'/,N/'D'/,O/'E'/,P/'F'/
+       IF(K.EQ.0) ICONV=A
+@@ -989,10 +1036,13 @@
+       SUBROUTINE HEX(LFUSES,IOP)
+ C     THIS SUBROUTINE GENERATES HEX PROGRAMMING FORMATS
+       IMPLICIT INTEGER (A-Z)
+-      INTEGER ITEMP(80),ZTABL1(32),ZTABL2(16),ZCSUM(4)
++      CHARACTER*2 ZTABL1(32)
++      CHARACTER*2 ITEMP(80)
++      CHARACTER ZTABL2(16),ZCSUM(4)
+       LOGICAL LFUSES(40,80)
+-      INTEGER SOH,STX,ETX,BEL
++      CHARACTER IOP
+       COMMON /LUNIT/PMS,POF,PDF
++      CHARACTER H,S,IBLANK
+       DATA H/'H'/,S/'S'/,IBLANK/' '/,
+      1     ZTABL1/'00','01','02','03','04','05','06','07',
+      2            '08','09','0A','0B','0C','0D','0E','0F',
+@@ -1000,7 +1050,10 @@
+      4            '18','19','1A','1B','1C','1D','1E','1F'/,
+      5     ZTABL2/'0','1','2','3','4','5','6','7',
+      6            '8','9','A','B','C','D','E','F'/
+-      DATA SOH/001/,STX/002/,ETX/003/,BEL/007/
++      CHARACTER SOH,STX,ETX,BEL
++      CHARACTER, PARAMETER :: CSOH=CHAR(1),CSTX=CHAR(2),CETX=CHAR(3),
++     $     CBEL=CHAR(7)
++      DATA SOH/CSOH/,STX/CSTX/,ETX/CETX/,BEL/CBEL/
+       CSUM=0
+ C
+       IF(IOP.EQ.H) WRITE(PDF,10)
+@@ -1049,7 +1102,8 @@
+ C
+       BLOCK DATA
+       IMPLICIT INTEGER (A-Z)
+-      COMMON /BLK/ PR8X10(10,14),PROD8(8,11),PRODLN(40,7)
++      CHARACTER PRODLN(40,7)
++      COMMON /BLK/ PR8X10(10,14),PROD8(8,11),PRODLN
+       DATA PR8X10/
+      1      4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+      2      3, 6, 5, 5, 5, 5, 5, 5, 6, 3,
+@@ -1101,7 +1155,9 @@
+       LOGICAL LFUSES(40,80),LBLANK,LLEFT,LAND,LOR,LSLASH,
+      1        LEQUAL,LRIGHT,LXOR,LPHANT(40,80)
+       COMMON  LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR
+-      COMMON /BLK/ PR8X10(10,14),PROD8(8,11),PRODLN(40,7)
++      CHARACTER PRODLN(40,7)
++      COMMON /BLK/ PR8X10(10,14),PROD8(8,11),PRODLN
++      CHARACTER P,N
+       DATA P/'P'/,N/'N'/
+       FUSPTR=1
+       DO 30 OUTPUT=1,10
+@@ -1127,8 +1183,9 @@
+       SUBROUTINE BINR(LFUSES,H,L)
+ C     THIS SUBROUTINE GENERATES BINARY PROGRAMMING FORMATS
+       IMPLICIT INTEGER (A-Z)
+-      INTEGER ITEMP(5,10)
++      CHARACTER ITEMP(5,10)
+       LOGICAL LFUSES(40,80)
++      CHARACTER H,L
+       COMMON /LUNIT/ PMS,POF,PDF
+       WRITE(PDF,10)
+    10 FORMAT(//,'                                         .',//)
+@@ -1197,11 +1254,13 @@
+ C     THIS SUBROUTINE UPDATES IOUT (THE PRINTED FUSE PLOT)
+ C      FOR HIGH AND LOW PHANTOM FUSES
+       IMPLICIT INTEGER (A-Z)
+-      INTEGER IOUT(64)
++      CHARACTER IOP
++      CHARACTER IOUT(64)
+       LOGICAL LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR
+       COMMON  LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR
+-      COMMON /BLK/ PR8X10(10,14),PROD8(8,11),PRODLN(40,7)
+-
++      CHARACTER PRODLN(40,7)
++      COMMON /BLK/ PR8X10(10,14),PROD8(8,11),PRODLN
++      CHARACTER B,N,P,LOFANT,HIFANT,IBLANK
+       DATA B/'B'/,N/'N'/,P/'P'/,LOFANT/'0'/,HIFANT/'O'/,IBLANK/' '/
+ C     GET OUTPUT GROUPING
+       OUTPUT=(IPROD-1)/8+1
+@@ -1248,22 +1307,26 @@
+ C     THIS SUBROUTINE PERFORMS THE FUNCTION TABLE SIMULATION
+ C      AND GENERATES TEST VECTORS
+       IMPLICIT INTEGER (A-Z)
+-      INTEGER ISYM(8,24),ISYM1(8,24),IBUF(8,24),IVECT(24),IVECTP(24),
+-     1        ISTATE(24),ISTATT(24),IPIN(24),TITLE(80),IPCTR,NTEST
+-     2        ,TSTVEC(24,42)
++      CHARACTER ISYM(8,24),ISYM1(8,24),IBUF(8,24),IVECT(24),IVECTP(24),
++     1        ISTATE(24),ISTATT(24),TITLE(80),TSTVEC(24,42)
++      INTEGER IPIN(24),IPCTR,NTEST
+       LOGICAL LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR,LSAME,
+      1        XORFND,LERR,LPHASE(24),LPHAS1(24),LBUF(24),LOUT(24),
+      2        LOUTP(24),LCLOCK,LPTRST,LCTRST,LENABL(24),NREG,
+      3        LSA11,LSA12,LSA01,LSA02,LPRINT
+-      INTEGER BEL
++      CHARACTER BEL
+       COMMON  LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR
+-      COMMON /PGE/ IPAGE(80,200)
++      CHARACTER IPAGE(80,200)
++      CHARACTER ITEST,XORSUM,ISUM,IPROD
++      COMMON /PGE/ IPAGE
+       COMMON /LUNIT/ PMS,POF,PDF
+       COMMON /FTEST/ IFUNCT,IDESC,IEND
+       COMMON /TSTVEC/ NTEST,TSTVEC
++      CHARACTER, PARAMETER :: CBEL = CHAR(7)
++      CHARACTER IDASH,L,H,X,C,Z,N0,N1,ERR,IBLANK,COMENT,NN
+       DATA IDASH/'-'/,L/'L'/,H/'H'/,X/'X'/,C/'C'/,Z/'Z'/,N0/'0'/,
+      1     N1/'1'/,ERR/'?'/,IBLANK/' '/,COMENT/';'/,NN/'N'/
+-      DATA BEL/007/
++      DATA BEL/CBEL/
+       NTEST = 0
+ C     PRINT AN ERROR MESSAGE IF NO FUNCTION TABLE IS SUPPLIED
+       IF(IFUNCT.NE.0) GO TO 3
+@@ -1659,7 +1722,7 @@
+ C     THIS SUBROUTINE GENERATES THE INTEL HEX PROGRAMMING FORMAT
+       IMPLICIT INTEGER (A-Z)
+       LOGICAL LFUSES(40,80)
+-      INTEGER  ZTABLE(16),IOP,ITEMP(2,40)
++      CHARACTER ZTABLE(16),IOP,ITEMP(2,40)
+       COMMON /LUNIT/ PMS,POF,PDF
+       DATA
+      1    ZTABLE/'0','1','2','3','4','5','6','7',
