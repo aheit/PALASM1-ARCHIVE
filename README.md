@@ -17,6 +17,7 @@ Various source code versions of PALASM 1 could be found on the internet. The fol
 
 |      Origin              | Rev. Date  | Version Number | Variant |   Language    | Target Environment             | Tag/Folder |
 | :-----------------:      | :--------: | :------------: | :------ | :-----------: |  :------:                      | :------:   |
+| Don Maslin[^mas2]        |  03/04/83  |      1.6A      | 20      | Fortran IV    | VAX/VMS 11/780, IBM SYSTEM/370 | P830304-20 |
 | Eric Smith[^es]          |  08/16/83  |      1.6C      | 20      | Fortran IV    | VAX/VMS 11/780, IBM SYSTEM/370 | P830816-20 |
 | Eric Smith[^es]          |  08/16/83  |      1.6C      | 24      | Fortran IV    | VAX/VMS 11/780, IBM SYSTEM/370 | P830816-24 |
 | Bitsavers[^pd17]         |  06/25/84  |      1.7D      | 20      | Fortran IV    | VAX/VMS 11/780, IBM SYSTEM/370 | P840625-20 |
@@ -64,4 +65,5 @@ The PALASM executable can be launched from the command line without arguments. P
 
 [^modfor]: [Modernizing Old Fortran](https://fortranwiki.org/fortran/show/Modernizing+Old+Fortran)
 [^es]: [MMI PALASM](http://www.brouhaha.com/~eric/retrocomputing/mmi/palasm/) 
+[^mas2]: [palasm16.zip](http://www.retroarchive.org/maslin/disks/cpmprog/palasm16.zip)
 [^pd17]: [Disk 6/7 of PALASM Distribution](http://www.bitsavers.org/components/mmi/palasm_pleasm/program/palasm_1.7D_1.8/DISK6.ZIP)

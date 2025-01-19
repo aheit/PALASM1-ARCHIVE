@@ -1,0 +1,763 @@
+# patch for PALASM1-ARCHIVE
+# 
+# This file is part of PALASM1-ARCHIVE
+# 
+# PALASM1-ARCHIVE is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# PALASM1-ARCHIVE is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with PALASM1-ARCHIVE.  If not, see <https://www.gnu.org/licenses/>.
+#
+# Author: Andreas Heitmann
+# Date: 2025-01-19
+#
+diff --strip-trailing-cr --unified orig/PAL20.FOR new/PAL20.FOR
+--- orig/PAL20.FOR	2025-01-19 15:24:29.150434600 +0100
++++ new/PAL20.FOR	2025-01-19 15:24:46.138010800 +0100
+@@ -1,18 +1,3 @@
+-
+-$ copy
+-$_From:        pal20.for
+-$_To:          ttd4:
+-C
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-**PALASM20**PALASM20**PALASM20**PALASM20**PALASM20**PALASM20**PALASM20
+ C
+ C  P A L A S M  2 0  -  TRANSLATES SYMBOLIC EQUATIONS INTO PAL OBJECT
+ C                       CODE  FORMATTED FOR DIRECT INPUT TO STANDARD
+@@ -22,7 +7,7 @@
+ C                       (C) COPYRIGHT 1983 MONOLITHIC MEMORIES
+ C
+ C
+-C                       *********************************************       
++C                       *********************************************
+ C                       *                                           *
+ C                       *            APPROVAL (03/04/83)            *
+ C                       *                                           *
+@@ -42,8 +27,13 @@
+ C                       *                                           *
+ C                       *                                           *
+ C                       *********************************************
++C                       *                                           *
++C                       * PATCHES FOR GFORTRAN COMPILER             *
++C                       * (C) 2024 ANDREAS HEITMANN                 *
++C                       *                                           *
++C                       *********************************************
++C
+ C
+-C  
+ C
+ C                       INPUT:       PAL DESIGN SPECIFICATION ASSIGNED
+ C                                    TO RPD(1).  OPERATION CODES ARE
+@@ -83,7 +73,7 @@
+ 
+ 
+ 
+-                                    ALL CHARACTERS FOLLOWING ';' ARE
++C                                    ALL CHARACTERS FOLLOWING ';' ARE
+ C                                    IGNORED UNTIL THE NEXT LINE.
+ C
+ C
+@@ -135,7 +125,7 @@
+ C
+ C                       AUTHORS:     JOHN BIRKNER AND VINCENT COLI
+ C                                    FAULT TESTING BY IMTIAZ BENGALI
+-C                                    JEDEC FORMAT  BY MANO VAFAI 
++C                                    JEDEC FORMAT  BY MANO VAFAI
+ C                                    MONOLITHIC MEMORIES INC.
+ C                                    1165 EAST ARQUES AVENUE
+ C
+@@ -177,12 +167,15 @@
+      1        LFIX,LFIRST,LFUSES(32,64),LPHASE(20),LBUF(20),
+      2        LPROD(80),LSAME,LACT,LOPERR,LINP,LPRD,LERR,LSA11,LSA01,
+      3        LPHANT(32,64)
+-      INTEGER   IPAGE(80,200),IPAL(4),IOT,REST(73),IOP,INOAI,INOO
++      CHARACTER   IPAGE(80,200),IPAL(4),IOT,REST(73),IOP,INOAI,INOO
+      1,         E,O,T,P,B,H,S,L,N,C,Q,U,F,R,A,Y,X,IBUF(8,20)
+      2,         BB,CC,DD,EE,FF,II,NN,OO,PP,RR,SS,TT,UU,hhh,lll,ppp,nnn
+      3,         ISYM(8,20)
+      4,         PATNUM(80),TITLE(80),COMP(80)
++      CHARACTER JJ
+       INTEGER BEL
++      LOGICAL IFIX
++      CHARACTER(LEN=1024) :: FILENAME
+       COMMON  LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR,LXNOR
+       COMMON /PGE/ IPAGE
+       COMMON /LFUSES/LFUSES,LPHANT
+@@ -225,6 +218,12 @@
+ C
+ C
+       RPD=1
++      CALL GETARG(1, FILENAME)
++      OPEN(UNIT=RPD, FILE=FILENAME, STATUS='OLD', IOSTAT=ios)
++      IF (IOS /= 0) THEN
++      	 PRINT *, 'Error opening file: ', filename
++	 STOP
++      END IF
+       ROC=5
+       POF=LUN
+       PDF=LUN
+@@ -240,9 +239,9 @@
+       LINP=.FALSE.
+ C     INITIALIZE LPRD TO FALSE (PRODUCT LINE ERROR)
+       LPRD=.FALSE.
+-C    
+ C
+-C          
++C
++C
+ C
+ C     READ IN FIRST 4 LINES OF THE PAL DESIGN SPECIFICATION
+       READ(RPD,10) IPAL,INOAI,IOT,INOO,REST,PATNUM,TITLE,COMP
+@@ -391,7 +390,7 @@
+                 IBLOW = IBLOW - 1
+                 LFUSES(IINPUT,IPROD)=.FALSE.
+                 CALL PLOT(LBUF,IBUF,LFUSES,IPROD,TITLE,.FALSE.,ITYPE,
+-     1                    LPROD,IOP,IBLOW,IPCTR) 
++     1                    LPROD,IOP,IBLOW,IPCTR)
+                 GO TO 60
+    59           CALL FIXSYM(LBUF,IBUF,IC,IL,LFIRST,LFUSES,IBLOW,
+      1                      IPROD,LFIX)
+@@ -493,7 +492,7 @@
+ 
+ 
+ 
+-C     INITIALIZING THE TOTAL FAULTS. CALLING FOR SA1/SA0 TEST 
++C     INITIALIZING THE TOTAL FAULTS. CALLING FOR SA1/SA0 TEST
+       ISAF=0
+       IF(IOP.EQ.F) GO TO 200
+ C     END OF ADDITION
+@@ -501,13 +500,13 @@
+ C        ADDITIONS MADE  TO GENERATE TEST VECTORS
+ C        FOR JEDEC FORMAT
+ C
+-         IF (IOP.NE.JJ) GOTO 135 
++         IF (IOP.NE.JJ) GOTO 135
+               CALL TEST(LPHASE,LBUF,TITLE,IC,IL,ILE,ISYM,IBUF,
+      1                   ITYPE,INOO,LFIX,IPCTR,LERR,ISAF,IPCTR1,
+      2                   .FALSE.,.FALSE.,IOP.NE.JJ)
+                   CALL PLOTF(ITYPE,IOT)
+ C
+-C        
++C
+ C
+   135 IF(IOP.EQ.P) CALL PLOT(LBUF,IBUF,LFUSES,IPROD,TITLE,.TRUE.,ITYPE,
+      1                       LPROD,IOP,IBLOW,IPCTR0)
+@@ -520,7 +519,7 @@
+       IF(IOP.EQ.C) CALL CAT
+ C     CALL IODC4
+ C
+-C        
++C
+ C
+             IF(IOP.EQ.II) CALL INTEL(LFUSES,II)
+       IF(IOP.NE.Q ) GO TO 108
+@@ -545,7 +544,7 @@
+       CALL TEST(LPHASE,LBUF,TITLE,IC,IL,ILE,ISYM,IBUF,ITYPE,INOO,
+      1          IFIX,IPCTR,LERR,ISAF,IPCTR1,.FALSE.,LSA01,IOP.NE.JJ)
+   215 CONTINUE
+-      ISA0=ISAF-ISA1  
++      ISA0=ISAF-ISA1
+       IFAULT=(ISAF*100)/(IPCTR0*2)
+       WRITE(POF,220) ISA1
+ C
+@@ -561,22 +560,22 @@
+ 
+ 
+ 
+- 220 FORMAT(/,' NUMBER OF STUCK AT ONE (SA1)  FAULTS ARE =' I3)
++  220 FORMAT(/,' NUMBER OF STUCK AT ONE (SA1)  FAULTS ARE =' I3)
+       WRITE(POF,225) ISA0
+   225 FORMAT(/,' NUMBER OF STUCK AT ZERO (SA0) FAULTS ARE =' I3)
+       WRITE(POF,230) IFAULT
+   230 FORMAT(/,' PRODUCT  TERM   COVERAGE                 =' I3,'%',//)
+-      GO TO 135 
+-C     END OF ADDITION FOR SA1/SA0 TEST 
++      GO TO 135
++C     END OF ADDITION FOR SA1/SA0 TEST
+       END
+ 
+ C**************************************************
+ C
+ C
+-      INTEGER FUNCTION ICONV(K)
++      CHARACTER FUNCTION ICONV(K)
+       IMPLICIT INTEGER (A-Z)
+-C      INTEGER A,B,C,D,E,F,G,H
+-C     1,I,J,X,L,M,N,O,P
++      CHARACTER A,B,C,D,E,F,G,H
++     1,I,J,X,L,M,N,O,P
+       DATA A/'0'/,B/'1'/,C/'2'/,D/'3'/,E/'4'/,F/'5'/,G/'6'/,H/'7'/
+       DATA I/'8'/,J/'9'/,X/'A'/,L/'B'/,M/'C'/,N/'D'/,O/'E'/,P/'F'/
+       IF(K.EQ.0) ICONV=A
+@@ -602,13 +601,13 @@
+ C***********************************************************************
+ C
+       SUBROUTINE INITLZ(INOAI,IOT,INOO,ITYPE,LFUSES,LPHANT,IC,IL,IBLOW,
+-     1                  LFIX,IPCTR) 
++     1                  LFIX,IPCTR)
+ C     THIS SUBROUTINE INITIALIZES VARIABLES AND MATCHES PAL PART
+ C     NUMBER WITH ITYPE
+       IMPLICIT INTEGER (A-Z)
+       LOGICAL LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR,LXNOR,
+      1        LFIX,LFUSES(32,64),LPHANT(32,64)
+-      INTEGER H,L,C,R,X,A,IPAGE(80,200),IOT,INOAI,INOO
++      CHARACTER H,L,C,R,X,A,IPAGE(80,200),IOT,INOAI,INOO
+      1         ,I0,I2,I4,I6,I8,TSTVEC(20,50)
+       COMMON  LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR,LXNOR
+       COMMON /PGE/ IPAGE
+@@ -672,7 +671,7 @@
+       IMPLICIT INTEGER (A-Z)
+       LOGICAL LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR,LXNOR,
+      1        LFIX,LPHASE(20)
+-      INTEGER IBLANK,IPAGE(80,200)
++      CHARACTER IBLANK,IPAGE(80,200)
+      1,         ISYM(8,20)
+       COMMON  LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR,LXNOR
+       COMMON /PGE/ IPAGE
+@@ -717,13 +716,15 @@
+       IMPLICIT INTEGER (A-Z)
+       LOGICAL LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR,LXNOR,
+      1        LFIX,LX1
+-      INTEGER IBLANK,ILEFT,IAND,IOR,COMENT,IPAGE(80,200)
++      CHARACTER IBLANK,ILEFT,IAND,IOR,COMENT,IPAGE(80,200)
+      1         ,ISLASH,IEQUAL,IRIGHT,ICOLON
++      CHARACTER TAB
++      CHARACTER, PARAMETER :: TABP = CHAR(9)
+       COMMON  LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR,LXNOR
+       COMMON /PGE/ IPAGE
+       COMMON /LUNIT/ PMS,POF,PDF
+       DATA IBLANK/' '/,ILEFT/'('/,IAND/'*'/,IOR/'+'/,COMENT/';'/,
+-     1     ISLASH/'/'/,IEQUAL/'='/,IRIGHT/')'/,ICOLON/':'/,TAB/009/
++     1     ISLASH/'/'/,IEQUAL/'='/,IRIGHT/')'/,ICOLON/':'/,TAB/TABP/
+       LBLANK=.FALSE.
+       LXOR=.FALSE.
+       LXNOR=.FALSE.
+@@ -765,7 +766,7 @@
+ 
+ 
+ 
+-     IF( IPAGE(IC,IL).EQ.IOR  ) LXOR=.TRUE.
++      IF( IPAGE(IC,IL).EQ.IOR  ) LXOR=.TRUE.
+       IF( IPAGE(IC,IL).EQ.IAND ) LXNOR=.TRUE.
+       GO TO 10
+    34 LLEFT =( IPAGE(IC,IL).EQ.ILEFT  )
+@@ -784,7 +785,7 @@
+ C      AND THE PIN NAME IN THE PIN LIST OR FUNCTION TABLE PIN LIST
+       IMPLICIT INTEGER (A-Z)
+       LOGICAL LMATCH
+-      INTEGER C,A,R,Y,IBUF(8,20),ISYM(8,20)
++      CHARACTER C,A,R,Y,IBUF(8,20),ISYM(8,20)
+       DATA C/'C'/,A/'A'/,R/'R'/,Y/'Y'/
+       IMATCH=0
+       DO 20 J=1,20
+@@ -843,10 +844,13 @@
+ C      PAL16X4 AND PAL16A4
+       IMPLICIT INTEGER (A-Z)
+       LOGICAL LBUF(20),LFUSES(32,64),LFIRST,LMATCH,LFIX
+-      INTEGER A,B,ISLASH,IOR,IBLANK,IRIGHT,IPAGE(80,200)
++      LOGICAL LPROD(80)
++      CHARACTER IOP
++      CHARACTER A,B,ISLASH,IOR,IBLANK,IRIGHT,IPAGE(80,200)
+      1         ,IAND,N,Q,N0,N1,N2,N3,CI
+      2         ,ICOLON
+      3         ,TABLE(5,14),IBUF(8,20),FIXBUF(8)
++      CHARACTER TITLE
+       COMMON /PGE/ IPAGE
+       DATA A/'A'/,B/'B'/,ISLASH/'/'/,IOR/'+'/,IBLANK/' '/,IRIGHT/')'/,
+      1        IAND/'*'/,N/'N'/,Q/'Q'/,N0/'0'/,N1/'1'/,N2/'2'/,N3/'3'/,
+@@ -902,7 +906,7 @@
+ 
+ 
+ 
+-  85 DO 90 I=1,4
++   85 DO 90 I=1,4
+           IF( (IMATCH-7).LE.0 ) GO TO 90
+           ISUM1=IINPUT+I
+           LFUSES(ISUM1,IPROD)=.FALSE.
+@@ -922,7 +926,7 @@
+       SUBROUTINE ECHO(IPAL,INOAI,IOT,INOO,REST,PATNUM,TITLE,COMP)
+ C     THIS SUBROUTINE PRINTS THE PAL DESIGN SPECIFICATION INPUT FILE
+       IMPLICIT INTEGER (A-Z)
+-      INTEGER IBLANK,IPAGE(80,200),IPAL(4),IOT,INOAI,INOO
++      CHARACTER IBLANK,IPAGE(80,200),IPAL(4),IOT,INOAI,INOO
+      1,         PATNUM(80),TITLE(80),COMP(80),REST(73)
+       COMMON /PGE/ IPAGE
+       COMMON /LUNIT/ PMS,POF,PDF
+@@ -951,7 +955,7 @@
+       WRITE(PMS,15)
+    15 FORMAT(' (C) COPYRIGHT 1983 MONOLITHIC MEMORIES')
+       WRITE(PMS,20)
+-   20 FORMAT(/,'    ECHO (E)     - PRINTS THE PAL DESIGN', 
++   20 FORMAT(/,'    ECHO (E)     - PRINTS THE PAL DESIGN',
+      4         ' SPECIFICATION',
+      5      /,'    PINOUT (O)   - PRINTS THE PINOUT OF THE PAL',
+      6      /,'    SIMULATE (T) - EXERCISES THE FUNCTION TABLE',
+@@ -971,7 +975,7 @@
+ 
+ 
+ 
+-     WRITE(PMS,30)
++      WRITE(PMS,30)
+    30 FORMAT('    BRIEF (B)    - PRINTS ONLY THE USED PRODUCT LINES',
+      1         ' OF THE FUSE PLOT',/,'                   PHANTOM',
+      2         ' FUSES ARE OMITTED',
+@@ -992,7 +996,7 @@
+       SUBROUTINE PINOUT(IPAL,INOAI,IOT,INOO,TITLE)
+ C     THIS SUBROUTINE PRINTS THE PINOUT OF THE PAL
+       IMPLICIT INTEGER (A-Z)
+-      INTEGER IBLANK,ISTAR,IPAGE(80,200),IPAL(4),IIN(7,2),IOT,INOAI
++      CHARACTER IBLANK,ISTAR,IPAGE(80,200),IPAL(4),IIN(7,2),IOT,INOAI
+      1         ,INOO,PIN(12,20)
+      2         ,TITLE(80)
+       COMMON /PGE/ IPAGE
+@@ -1040,7 +1044,7 @@
+ 
+ 
+ 
+-  55 CONTINUE
++   55 CONTINUE
+    60 DO 75 J=1,10
+           II=0
+    65     II=II+1
+@@ -1092,7 +1096,7 @@
+      1                LPROD,IOP,IBLOW,IPCTR0)
+ C     THIS THIS SUBROUTINE PRODUCES THE FUSE PLOT
+       IMPLICIT INTEGER (A-Z)
+-      INTEGER ISAVE(64,32),IAND,IOR,ISLASH,IBUF(8,20),IOUT(64),IOP
++      CHARACTER ISAVE(64,32),IAND,IOR,ISLASH,IBUF(8,20),IOUT(64),IOP
+      1        ,IDASH,X,IBLANK,P,B
+      2        ,HIFANT
+ C
+@@ -1108,7 +1112,7 @@
+ 
+ 
+ 
+-    3        ,TITLE(80)
++     3        ,TITLE(*)
+       LOGICAL LBUF(20),LFUSES(32,64),LDUMP,LPROD(80)
+       COMMON /LUNIT/ PMS,POF,PDF
+       DATA ISAVE/2048*' '/,IAND/'*'/,IOR/'+'/,ISLASH/'/'/,
+@@ -1133,7 +1137,7 @@
+       ISAVE(IPROD,32)=IAND
+       RETURN
+ C     PRINT FUSE PLOT
+-   60 WRITE(POF,62) TITLE
++   60 WRITE(POF,62) TITLE(80)
+    62 FORMAT(/,' ',80A1,//,
+      1 '                11 1111 1111 2222 2222 2233',/,
+      2 '    0123 4567 8901 2345 6789 0123 4567 8901',/)
+@@ -1195,13 +1199,18 @@
+ C     THIS SUBROUTINE GENERATES HEX PROGRAMMING FORMATS
+       IMPLICIT INTEGER (A-Z)
+       LOGICAL LFUSES(32,64)
+-      INTEGER SOH,STX,ETX,BEL
+-      INTEGER ZTABLE(16),ZCSUM(4),IOP,ITEMP(64)
++      CHARACTER SOH,STX,ETX,BEL
++      CHARACTER ZTABLE(16),ZCSUM(4),IOP,ITEMP(64)
++      CHARACTER H,S,IBLANK
+       COMMON /LUNIT/ PMS,POF,PDF
+       DATA H/'H'/,S/'S'/,IBLANK/' '/,
+      1    ZTABLE/'0','1','2','3','4','5','6','7',
+      2           '8','9','A','B','C','D','E','F'/
+-      DATA SOH/001/,STX/002/,ETX/003/,BEL/007/
++      CHARACTER, PARAMETER :: SOHP = CHAR(1)
++      CHARACTER, PARAMETER :: STXP = CHAR(2)
++      CHARACTER, PARAMETER :: ETXP = CHAR(3)
++      CHARACTER, PARAMETER :: BELP = CHAR(7)
++      DATA SOH/SOHP/,STX/STXP/,ETX/ETXP/,BEL/BELP/
+       CSUM=0
+       IF(IOP.EQ.H) WRITE(PDF,10)
+    10 FORMAT(//,'                                         .',//)
+@@ -1266,7 +1275,7 @@
+ C      FOR HIGH AND LOW PHANTOM FUSES
+       IMPLICIT INTEGER (A-Z)
+       LOGICAL LFUSES(32,64),LPHANT(32,64)
+-      INTEGER L,C,IOT
++      CHARACTER L,C,IOT
+       DATA L/'L'/,C/'C'/
+       IF(ITYPE.GE.4) GO TO 20
+       DO 10 IPROD=1,64
+@@ -1311,7 +1320,7 @@
+ 
+ 
+ 
+-         DO 12 IPROD=1,57,8
++          DO 12 IPROD=1,57,8
+               LFUSES(IINPUT,IPROD+4)=.FALSE.
+               LFUSES(IINPUT,IPROD+5)=.FALSE.
+               LFUSES(IINPUT,IPROD+6)=.FALSE.
+@@ -1380,7 +1389,7 @@
+ 
+ 
+       IMPLICIT INTEGER (A-Z)
+-      INTEGER ITEMP(4,8),H,L
++      CHARACTER ITEMP(4,8),H,L
+       LOGICAL LFUSES(32,64)
+       COMMON /LUNIT/ PMS,POF,PDF
+       WRITE(PDF,10)
+@@ -1415,7 +1424,7 @@
+ C      CORRESPONDING OUTPUT PIN
+       IMPLICIT INTEGER (A-Z)
+       LOGICAL LFUSES(32,64)
+-      INTEGER R,I1,I2,I4,I6,I8,IOT,INOAI,INOO
++      CHARACTER R,I1,I2,I4,I6,I8,IOT,INOAI,INOO
+       DATA R/'R'/,I1/'1'/,I2/'2'/,I4/'4'/,I6/'6'/,I8/'8'/
+       IF( (INOAI.NE.I6) .OR. (INOO.EQ.I1) .OR.  (INOO.EQ.I2) .OR.
+      1    ( (IOT.EQ.R).AND.(INOO.EQ.I8) ) .OR.
+@@ -1447,7 +1456,7 @@
+ 
+ 
+ 
+-      INTEGER X,IDASH,LOFANT,HIFANT, IOUT(64)
++      CHARACTER X,IDASH,LOFANT,HIFANT, IOUT(64)
+       DATA X/'X'/,IDASH/'-'/,LOFANT/'0'/,HIFANT/'O'/
+       DO 10 I=1,32
+           IF( IOUT(I).EQ.IDASH ) IOUT(I)=HIFANT
+@@ -1524,7 +1533,7 @@
+      1        LFIX,LSAME,XORFND,LERR,LPHASE(20),LPHAS1(20),LBUF(20),
+      2        LOUT(20),LOUTP(20),LCLOCK,LPTRST,LCTRST,LENABL(20),NREG,
+      3        LSA11,LSA12,LSA01,LSA02,LPRINT
+-      INTEGER  IPAGE(80,200),INOO,ISYM(8,20),ISYM1(8,20)
++      CHARACTER  IPAGE(80,200),INOO,ISYM(8,20),ISYM1(8,20)
+      1         ,IDASH,L,H,X,C,Z,N0,IVECT(20),ITEST,IPROD,ISUM,XORSUM
+      2         ,N1,ERR,IBLANK,COMENT,I4,I6,ISTATT(20),ISTATE(20)
+      3         ,I8
+@@ -1565,7 +1574,7 @@
+       IPCTR3=0
+       IEQN=0
+       IPCTR=0
+-C      
++C
+ C     MAKE A DUMMY CALL TO INCR
+       CALL INCR(IC,IL,LFIX)
+ C     GET THE FUNCTION TABLE PIN LIST (UP TO 18)
+@@ -1583,25 +1592,25 @@
+ 
+ 
+ 
+-     DO 10 I=1,19
++      DO 10 I=1,19
+       CALL GETSYM(LPHAS1,ISYM1,I,IC,IL,LFIX)
+          DO 5 J=1,8
+     5    IBUF(J,1)=ISYM1(J,I)
+       IF(IBUF(8,1).EQ.IDASH) GO TO 12
+       CALL MATCH(IMATCH,IBUF,ISYM)
+-      IF(IMATCH.NE.0) GO TO 7 
++      IF(IMATCH.NE.0) GO TO 7
+       WRITE(PMS,6) (IBUF(J,1),J=1,8)
+-    6 FORMAT(/,' FUNCTION TABLE PIN LIST ERROR AT', 8A1) 
++    6 FORMAT(/,' FUNCTION TABLE PIN LIST ERROR AT', 8A1)
+       RETURN
+     7 LOUT(I)=.FALSE.
+       ISTATT(I)=X
+       IVECTP(I)=X
+-C     IF APPROPIATE PAL TYPE, REMEMBER LOCATION OF CLOCK AND THREE-STATE    
++C     IF APPROPIATE PAL TYPE, REMEMBER LOCATION OF CLOCK AND THREE-STATE
+ C      ENABLE PIN IN FUNCTION TABLE PIN LIST
+       IF(ITYPE.NE.6) GO TO 10
+       IF(IMATCH.EQ.1)  ICLOCK=I
+       IF(IMATCH.EQ.11) ITRST=I
+-   10 IPIN(I)=IMATCH 
++   10 IPIN(I)=IMATCH
+ C     ALL SIGNAL NAMES FOR THE FUNCTIONAL TEST HAVE BEEN READ IN
+ C      ADJUST COUNT
+    12 IMAX=I-1
+@@ -1702,7 +1711,7 @@
+    27 IF(.NOT.LEQUAL) GO TO 26
+ C *************ADDED FOR EQN CONT**********
+       IF(LEQUAL) IEQN=IEQN+1
+-C *****************************************  
++C *****************************************
+ C     EVALUATE CONDITIONAL THREE-STATE PRODUCT LINE
+    29 IF(LEQUAL) GO TO 35
+       NREG=.TRUE.
+@@ -1720,7 +1729,7 @@
+ 
+ 
+ 
+-     CALL MATCH(IINP,IBUF,ISYM1)
++      CALL MATCH(IINP,IBUF,ISYM1)
+ C     CHECK FOR GND, VCC, /GND, OR /VCC IN CONDITIONAL THREE-STATE
+ C      PRODUCT LINE
+       IF(IINP.NE.0) GO TO 32
+@@ -1731,7 +1740,7 @@
+      1    IMATCH.EQ.20.AND.(.NOT.LBUF(1)) ) LCTRST=.FALSE.
+       GO TO 34
+    32 ITEST=IVECT(IINP)
+-      IF(  ITEST.EQ.L.AND.(     LPHAS1(IINP)).AND.(     LBUF(1)) 
++      IF(  ITEST.EQ.L.AND.(     LPHAS1(IINP)).AND.(     LBUF(1))
+      1.OR. ITEST.EQ.H.AND.(     LPHAS1(IINP)).AND.(.NOT.LBUF(1))
+      2.OR. ITEST.EQ.H.AND.(.NOT.LPHAS1(IINP)).AND.(     LBUF(1))
+      3.OR. ITEST.EQ.L.AND.(.NOT.LPHAS1(IINP)).AND.(.NOT.LBUF(1))
+@@ -1760,7 +1769,7 @@
+       IF( .NOT.LCTRST ) LOUT(IOUTP)=.FALSE.
+       LCTRST=.TRUE.
+       LOUTP(IOUTP)=LBUF(1)
+-C     DETERMINE PRODUCT TERM AND EVENTUALLY SUM FOR OUTPUT KEEPING 
++C     DETERMINE PRODUCT TERM AND EVENTUALLY SUM FOR OUTPUT KEEPING
+ C      TRACK TO SEE IF AN XOR (EXCLUSIVE OR) HAS BEEN FOUND
+       XORSUM=H
+       XORFND=.FALSE.
+@@ -1815,10 +1824,10 @@
+       IF(  INOO.EQ.I8.AND.(IIFB.EQ.12.OR.IIFB.EQ.19) )
+      1     ITEST=IVECTP(IINP)
+    37 IF( ITEST.EQ.X.OR.ITEST.EQ.Z ) ITEST=L
+-      IF(  ITEST.EQ.L.AND.(     LPHAS1(IINP)).AND.(     LBUF(1)) 
++      IF(  ITEST.EQ.L.AND.(     LPHAS1(IINP)).AND.(     LBUF(1))
+      1.OR. ITEST.EQ.H.AND.(     LPHAS1(IINP)).AND.(.NOT.LBUF(1))
+      2.OR. ITEST.EQ.H.AND.(.NOT.LPHAS1(IINP)).AND.(     LBUF(1))
+-     3.OR. ITEST.EQ.L.AND.(.NOT.LPHAS1(IINP)).AND.(.NOT.LBUF(1)) 
++     3.OR. ITEST.EQ.L.AND.(.NOT.LPHAS1(IINP)).AND.(.NOT.LBUF(1))
+      4  )  IPROD=L
+ C     *THE FOLLOWING ADDITION IS FOR SA1 TEST
+ C     CHECK FOR A PARTICULAR PRODUCT TERM AND GO FOR SA1 TEST
+@@ -1829,10 +1838,10 @@
+ C     *SA0 ADDITION
+ C     CHECK FOR A PARTICULAR PRODUCT TERM AND GO FOR SA0 TEST
+       IF((IPCTR2.EQ.IPCTR1).AND.(LSA01))GO TO 120
+-C     *END OF ADDITION 
++C     *END OF ADDITION
+   121 IF(ISUM.EQ.L.AND.IPROD.EQ.X) ISUM=X
+       IF( (ISUM.NE.H).AND.IPROD.EQ.H ) ISUM=H
+-C     CHECK FOR XOR (EXCLUSIVE OR) AND SAVE INTERMEDIATE VALUE 
++C     CHECK FOR XOR (EXCLUSIVE OR) AND SAVE INTERMEDIATE VALUE
+       IF(.NOT.LXOR) GO TO 31
+       XORSUM=ISUM
+       XORFND=.TRUE.
+@@ -1840,7 +1849,7 @@
+       GO TO 28
+    31 IF(LOR) GO TO 28
+       IPCTR3=0
+-C     IF END OF EQUATION HAS BEEN FOUND, DETERMINE FINAL SUM AND SAVE IT    
++C     IF END OF EQUATION HAS BEEN FOUND, DETERMINE FINAL SUM AND SAVE IT
+       IF(.NOT.XORFND)    ISTATT(IOUTP)=ISUM
+       IF( (XORFND).AND.((ISUM.EQ.L.AND.XORSUM.EQ.L).OR.
+ C
+@@ -1856,7 +1865,7 @@
+ 
+ 
+ 
+-    1                  (ISUM.EQ.H.AND.XORSUM.EQ.H)) ) ISTATT(IOUTP)=L
++     1                  (ISUM.EQ.H.AND.XORSUM.EQ.H)) ) ISTATT(IOUTP)=L
+       IF( (XORFND).AND.((ISUM.EQ.H.AND.XORSUM.EQ.L).OR.
+      1                  (ISUM.EQ.L.AND.XORSUM.EQ.H)) ) ISTATT(IOUTP)=H
+       IF( (XORFND).AND. (ISUM.EQ.X.OR. XORSUM.EQ.X) )  ISTATT(IOUTP)=X
+@@ -1890,7 +1899,7 @@
+       IF(IMESS.NE.40) LERR=.TRUE.
+ C     *THIS IS AN ADDITION FOR SA1/SA0  TESTS
+ C     IF NO FAULT GO FOR NEXT VECTOR ELSE GET OUT OF SIMULATION AND
+-C     START SIMULATION FOR THE NEXT PRODUCT TERM. 
++C     START SIMULATION FOR THE NEXT PRODUCT TERM.
+       IF((.NOT.LERR).AND.((LSA11).OR.(LSA01))) GO TO 50
+       IF((LERR).AND.((LSA11).OR.(LSA01))) GO TO 115
+ C     ***************************************************************
+@@ -1901,7 +1910,7 @@
+    42 FORMAT(/,' FUNCTION TABLE ERROR IN VECTOR',I4,'  PIN =',8A1,
+      1         '  EXPECT = L  ACTUAL = H')
+       IF(IMESS.EQ.43) WRITE(PMS,43) NVECT,(ISYM1(J,I),J=1,8)
+-   43 FORMAT(/,' FUNCTION TABLE ERROR IN VECTOR',I4,'  PIN =',8A1, 
++   43 FORMAT(/,' FUNCTION TABLE ERROR IN VECTOR',I4,'  PIN =',8A1,
+      1       /,'  EXPECT  = OUTPUT ENABLE  ACTUAL = Z')
+       IF(IMESS.EQ.44) WRITE(PMS,44) NVECT,(ISYM1(J,I),J=1,8),IVECT(I)
+    44 FORMAT(/,' FUNCTION TABLE ERROR IN VECTOR',I4,'  PIN =',8A1,
+@@ -1924,7 +1933,7 @@
+ 
+ 
+ 
+-C    CHANGE THE ORDER OF VECTORS FROM THE ORDER OF APPEARANCE IN THE
++C     CHANGE THE ORDER OF VECTORS FROM THE ORDER OF APPEARANCE IN THE
+ C      FUNCTION TABLE TO THAT OF THE PIN LIST AND TWEEK FOR OUTPUT
+       DO 65 I=1,20
+          DO 55 J=1,IMAX
+@@ -1932,7 +1941,7 @@
+          IF( IVECT(J).EQ.L.OR.IVECT(J).EQ.H ) GO TO 51
+          ISTATE(I)=IVECT(J)
+          GO TO 65
+-   51    LSAME=( (     LPHASE(I)).AND.(     LPHAS1(J)).OR.    
++   51    LSAME=( (     LPHASE(I)).AND.(     LPHAS1(J)).OR.
+      1           (.NOT.LPHASE(I)).AND.(.NOT.LPHAS1(J)) )
+          IF( INOO.EQ.N1.AND.(I.EQ.15.OR.I.EQ.16) )  LOUT(J)=.TRUE.
+          IF( (.NOT.LOUT(J)).AND.(     LSAME).AND.
+@@ -1997,7 +2006,7 @@
+             IF (ISTATE(I).EQ.N1) TSTVEC(I,NTEST) =N1
+  1010    CONTINUE
+ C
+-C                  END OF ADDITIONS 
++C                  END OF ADDITIONS
+ C
+       GO TO 90
+ C     TERMINATE SIMULATION
+@@ -2009,7 +2018,7 @@
+       IF((.NOT.LERR).AND.(LSA01).AND.LPRINT)
+      1 WRITE(POF,155) IPCTR4,IEQN1
+   155 FORMAT(' ',' PRODUCT: ',I3,' OF ','EQUATION.',I3,'
+-     1 UNTESTED(SA0)FAULT')  
++     1 UNTESTED(SA0)FAULT')
+ C     *END OF ADDITION
+       IF((.NOT.LERR).AND.((.NOT.LSA11).AND.(.NOT.LSA01)).AND.LPRINT)
+      1 WRITE(POF,67)
+@@ -2076,7 +2085,7 @@
+       LOGICAL LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR,LXNOR,
+      1        LFIX,LPHAS1(20),LBUF(20),LCLOCK,NREG,TOR,TXOR,TXNOR,TAND,
+      2        LPHASA,LPHASB
+-      INTEGER L,H,X,Z,IPAGE(80,200),ISYM(8,20),ISYM1(8,20),IBUF(8,20)
++      CHARACTER L,H,X,Z,IPAGE(80,200),ISYM(8,20),ISYM1(8,20),IBUF(8,20)
+      1         ,IVECT(20),IVECTP(20),ITEST,ITESTA,ITESTB
+       COMMON  LBLANK,LLEFT,LAND,LOR,LSLASH,LEQUAL,LRIGHT,LXOR,LXNOR
+       COMMON /PGE/ IPAGE
+@@ -2150,14 +2159,17 @@
+       END
+ C
+ C  ************THIS SUBROUTINE IS ADDED FOR JEDEC FORMAT*********
+-C  THE FOLLOWING SUBROUTINE GIVES JEDEC FORMATTED OUTPUT FOR 
++C  THE FOLLOWING SUBROUTINE GIVES JEDEC FORMATTED OUTPUT FOR
+ C  PROGRAMMING COMPATIBILITY WITH DATA I/O PROGRAMMERS
+       SUBROUTINE PLOTF(ITYPE,IOT)
+       IMPLICIT INTEGER (A-Z)
+       LOGICAL  LFUSES (32,64),LPHANT(32,64)
+-      INTEGER ZERO,ONE,IPBUF(32),IOT,STAR,TSTVEC(20,50)
+-      INTEGER ISUM(4),IADR,STX,ETX,IDEC(4),IPT,IINP,J1,J2,PINOUT
+-      INTEGER IDECIO(4),ISUMIO(4),BUFIO(32),NFUSE,NTEST
++      CHARACTER ZERO,ONE,IPBUF(32),IOT,STAR,TSTVEC(20,50)
++      INTEGER ISUM(4),IADR,IDEC(4),IPT,IINP,J1,J2,PINOUT
++      CHARACTER STX,ETX
++      CHARACTER IDECIO(4),ISUMIO(4),BUFIO(32)
++      INTEGER NFUSE,NTEST
++      CHARACTER ICONV
+       COMMON  /LUNIT/ PMS,POF,PDF
+       COMMON  /IPT/ IPT
+       COMMON  /LFUSES/ LFUSES,LPHANT
+@@ -2165,8 +2177,8 @@
+       COMMON  /TSTVEC/ NTEST, TSTVEC
+       DATA    ZERO/'0'/, ONE/'1'/, STAR/'*'/
+       IADR=0
+-      STX=2
+-      ETX=3
++      STX=CHAR(2)
++      ETX=CHAR(3)
+ C
+ C           ADDITIONS  TO GENERATE PINOUT AND
+ C           FAMILY CODE.
+@@ -2197,7 +2209,7 @@
+ 
+ 
+ 
+-C           
++C
+       DO 300 IPT=1,64
+       IF(LPHANT(9,IPT)) GO TO 300
+       NFUSE = 0
+@@ -2233,14 +2245,14 @@
+                ISUM(2) = MOD(ISUM(2)+ISUM(4)/256,256)
+                ISUM(4) = MOD(ISUM(4),256)
+                DO 350 I = 1,20
+-               J1 = TSTVEC(I,J)
++               J1 = ICHAR(TSTVEC(I,J))
+                ISUM(4) = ISUM(4) + J1
+                ISUM(2) = MOD(ISUM(2)+ISUM(4)/256,256)
+                ISUM(4) = MOD(ISUM(4),256)
+   350          CONTINUE
+                DO 360 I = 1,4
+-               IDECIO(I) = MOD(J/10**(4-I),10)
+-               ISUM(4) = ISUM(4) + IDECIO(I) + 48
++               IDECIO(I) = CHAR(MOD(J/10**(4-I),10))
++               ISUM(4) = ISUM(4) + ICHAR(IDECIO(I)) + ICHAR('0')
+                ISUM(2) = MOD(ISUM(2)+ISUM(4)/256,256)
+                ISUM(4) = MOD(ISUM(4),256)
+   360          CONTINUE
+@@ -2248,7 +2260,7 @@
+   410          FORMAT(' V',4I1,1X,20A1,' *')
+   370          CONTINUE
+ C
+-C           
++C
+ C
+   380 ISUMIO(1)=ICONV(ISUM(2)/16)
+ C
+@@ -2265,7 +2277,7 @@
+ 
+ 
+ 
+-     ISUM(2)=MOD(ISUM(2),16)
++      ISUM(2)=MOD(ISUM(2),16)
+       ISUMIO(2)=ICONV(ISUM(2))
+       ISUMIO(3)=ICONV(ISUM(4)/16)
+       ISUM(4)=MOD(ISUM(4),16)
+@@ -2281,17 +2293,17 @@
+       SUBROUTINE SUMCHK
+       IMPLICIT INTEGER (A-Z)
+       LOGICAL LFUSES(32,64),LPHANT(32,64)
+-      INTEGER BUFIO(32),NFUSE
++      INTEGER NFUSE
+       INTEGER ISUM(4),IDEC(4)
+-      INTEGER IPBUF(32)
++      CHARACTER BUFIO(32),IPBUF(32)
+       COMMON /IPT/ IPT
+       COMMON /LFUSES/ LFUSES,LPHANT
+       COMMON/SUM/ ISUM,IDEC,IPBUF,BUFIO,NFUSE
+       DO 50 J=1,32
+       IF(LPHANT(J,IPT)) GO TO 50
+-      IF(LFUSES(J,IPT)) BUFIO(J)=49
+-      IF(.NOT.LFUSES(J,IPT)) BUFIO(J)=48
+-      ISUM(4)=ISUM(4)+BUFIO(J)
++      IF(LFUSES(J,IPT)) BUFIO(J)='1'
++      IF(.NOT.LFUSES(J,IPT)) BUFIO(J)='0'
++      ISUM(4)=ISUM(4)+ICHAR(BUFIO(J))
+       ISUM(2)=MOD(ISUM(2)+ISUM(4)/256,256)
+       ISUM(4)=MOD(ISUM(4),256)
+    50 CONTINUE
+@@ -2312,7 +2324,7 @@
+ C     THIS SUBROUTINE GENERATES INTEL HEX PROGRAMMING FORMATS
+       IMPLICIT INTEGER (A-Z)
+       LOGICAL LFUSES(32,64)
+-      INTEGER   ZTABLE(16),IOP,ITEMP(32)
++      CHARACTER   ZTABLE(16),IOP,ITEMP(32)
+       COMMON /LUNIT/ PMS,POF,PDF
+       DATA
+      1    ZTABLE/'0','1','2','3','4','5','6','7',
+@@ -2333,7 +2345,7 @@
+ 
+ 
+ 
+-     DO 40 I=1,33,32
++      DO 40 I=1,33,32
+       INC=I-1
+         DO 40 IPROD=1,8
+           CSUM = MOD(ADDR/256+MOD(ADDR,256)+32,256)
+@@ -2362,19 +2374,3 @@
+ C                  **************END************
+ C
+ 
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-$  AND SAVE INTERMEDIATE VALUE 
+-      IF(.NOT.LXOR
+\ No newline at end of file
